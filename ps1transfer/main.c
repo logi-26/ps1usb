@@ -459,6 +459,7 @@ pcdrvout:
 
 int main(int argc, char *argv[])
 {
+	int			deviceid = 0;
 	int			x, y, w, h, i, ret, cmd = CMD_UNKNOWN;
 	uint32_t	size = 0, adrs = 0x80010000, *ptr32;
 	uint16_t	*ptr16;
@@ -466,30 +467,7 @@ int main(int argc, char *argv[])
 	char		*filename = NULL, *path = NULL;
 	bool		ttymode = false, reset = false;
 
-	printf("PS1USB Transfer tool v1.0 by OrionSoft [2024]\n\n");
-
-#ifdef  _WIN32
-	if (FT_Open(0, &ftdi) != FT_OK)
-	{
-		fprintf(stderr, "Unable to open USB device.\n");
-		return EXIT_FAILURE;
-	}
-#else
-	if ((ftdi = ftdi_new()) == 0)
-	{
-		fprintf(stderr, "ftdi_new failed\n");
-		return EXIT_FAILURE;
-	}
-
-	if ((ret = ftdi_usb_open(ftdi, 0x0403, 0x6001)) < 0)
-	{
-		fprintf(stderr, "Unable to open USB device: %d (%s)\n", ret, ftdi_get_error_string(ftdi));
-		ftdi_free(ftdi);
-		return EXIT_FAILURE;
-	}
-#endif
-
-	ftdi_tcioflush(ftdi);
+	printf("PS1USB Transfer tool v1.0 by OrionSoft [2024] (logi26 mod) \n\n");
 
 	// Handle arguments list
 	for (i = 1; i < argc; i++)
@@ -569,12 +547,40 @@ int main(int argc, char *argv[])
 					}
 					i++;
 				break;
+				
+				case 'z':	// set device id (only relevant when using multiple PS1USB devices)
+					deviceid = atoi(argv[i + 1]);
+					i++;
+				break;
 			}
 		}
 		else
 			goto usage;
 	}
+	
+#ifdef  _WIN32
+	if (FT_Open(deviceid, &ftdi) != FT_OK)
+	{
+		fprintf(stderr, "Unable to open USB device.\n");
+		return EXIT_FAILURE;
+	}
+#else
+	if ((ftdi = ftdi_new()) == 0)
+	{
+		fprintf(stderr, "ftdi_new failed\n");
+		return EXIT_FAILURE;
+	}
 
+	if ((ret = ftdi_usb_open(ftdi, 0x0403, 0x6001)) < 0)
+	{
+		fprintf(stderr, "Unable to open USB device: %d (%s)\n", ret, ftdi_get_error_string(ftdi));
+		ftdi_free(ftdi);
+		return EXIT_FAILURE;
+	}
+#endif
+
+	ftdi_tcioflush(ftdi);	
+	
 	if (!filename && !reset)
 	{
 		printf("No file specified.\n");
@@ -746,6 +752,7 @@ usage:
 	printf("\t-s size (size of download in decimal)\n");
 	printf("\t-c Switch to TTY console mode after executing command.\n");
 	printf("\t-p path (indicate path to PCDRV file server, require -c)\n");
+	printf("\t-z deviceid (only relevant when multiple PS1USB devices are connected via USB)\n");
 	printf("\nData are secured using CRC8.\n");
 
 done:
