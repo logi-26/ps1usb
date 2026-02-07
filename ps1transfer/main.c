@@ -466,6 +466,7 @@ int main(int argc, char *argv[])
 	uint8_t		*data = NULL, *ptr;
 	char		*filename = NULL, *path = NULL;
 	bool		ttymode = false, reset = false;
+	bool		tty_enable = true;		// Default = redirect enabled (old behaviour)
 
 	printf("PS1USB Transfer tool v1.0 by OrionSoft [2024] (logi26 mod) \n\n");
 
@@ -498,6 +499,15 @@ int main(int argc, char *argv[])
 
 				case 'c':	// TTY Console mode
 					ttymode = true;
+					tty_enable = true;
+
+					// Allow -c0 or -coff to disable TTY redirect
+					if (i+1 < argc && (argv[i+1][0] == '0' || strcmp(argv[i+1], "off") == 0))
+					{
+						tty_enable = false;
+						ttymode = false;	// Can't have console if nothing is sent
+						i++;
+					}	
 				break;
 
 				case 'f':	// file
@@ -644,8 +654,17 @@ int main(int argc, char *argv[])
 			if (USB_Process('U', ptr, adrs, size))
 			{
 				printf("\nExecuting...\n");
-				if (!USB_Process('E', &data[8+4+4], 0, 15*4))
-					goto USB_error;
+				
+				if (USB_Process('E', &data[8+4+4], 0, 15*4))
+				{
+					// Tell the kernel hook whether we want printf→USB or not
+					printf("TTY redirect %s\n", tty_enable ? "ENABLED" : "DISABLED");
+					USB_Process('T', NULL, tty_enable ? 1 : 0, 0);
+
+                     printf("\nExecuting...\n");
+                     if (!USB_Process('E', &data[8+4+4], 0, 15*4))
+                         goto USB_error;
+                }
 			}
 			else
 				goto USB_error;

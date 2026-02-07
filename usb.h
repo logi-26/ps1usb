@@ -281,7 +281,7 @@ int		USB_ProcessReceive(void)
 #ifndef HOOK
 	if (!((USB_cmd[0] == 'D') || (USB_cmd[0] == 'U') || (USB_cmd[0] == 'E') || (USB_cmd[0] == 'F') || (USB_cmd[0] == 'R')))
 #else
-	if (!(USB_cmd[0] == 'R'))
+	if (!(USB_cmd[0] == 'R' || USB_cmd[0] == 'T'))	// 'T' = TTY control
 #endif
 		return (USB_STATE_BAD_CMD);
 
@@ -341,6 +341,16 @@ int		USB_ProcessReceive(void)
 
 		EnterCriticalSection();
 		Exec(&exe_header, 1, NULL);
+	}
+#endif
+
+#ifdef HOOK
+	// New: TTY redirect toggle (only works when kernel hook is active)
+	// Param low byte: 0 = disable printf→USB, anything else = enable
+	if (USB_cmd[0] == 'T')
+	{
+		g_tty_redirect_enabled = (USB_cmd[4] != 0);		// USB_cmd[4] = low byte of param
+		return (USB_STATE_OK);
 	}
 #endif
 

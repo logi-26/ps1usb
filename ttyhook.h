@@ -9,6 +9,8 @@
 
 #include "common/syscalls/syscalls.h"
 
+extern bool g_tty_redirect_enabled;
+
 // Not in syscall.h :/
 static __attribute__((always_inline)) int syscall_removeDevice(const char *filename) {
     register int n asm("t1") = 0x48;
@@ -30,9 +32,15 @@ int	USB_tty_action(struct File *file, enum FileAction action)
 	for (i = j = 0; i < file->count; i++)
 	{
 		if (action == PSXWRITE)
-			ret = USB_SendByte(*buf8);
+		{
+			if (g_tty_redirect_enabled)
+				ret = USB_SendByte(*buf8);	// Send to PC
+			else
+				ret = true;					// Pretend success → no USB traffic, no delay
+		}
 		else
 			ret = USB_GetByte(buf8);
+		
 		if (ret)
 		{
 			j++;

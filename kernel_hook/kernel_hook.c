@@ -13,6 +13,9 @@
 void	(* ReturnFromExceptionOld)(void);
 bool	is_tty_enabled;
 
+// Runtime toggle for TTY→USB redirection (controlled from PC)
+bool    g_tty_redirect_enabled = true;
+
 typedef struct
 {
 	bool	is_enabled;
@@ -44,17 +47,39 @@ static inline void	**GetB0Table(void)
 	return ((void **(*)(void))0xB0)();
 }
 
+
+
+
 void	ReturnFromExceptionHook(void)
 {
 	int	ret;
 
 	if (kernel_hook_params.is_enabled)
 	{
+		
+		/*
 		if (!is_tty_enabled)
 		{
 			SetupTTYhook();
 			is_tty_enabled = true;
 		}
+		*/
+		
+		if (g_tty_redirect_enabled)
+        {
+            if (!is_tty_enabled)
+            {
+                SetupTTYhook();
+                is_tty_enabled = true;
+            }
+        }
+        else
+        {
+            if (is_tty_enabled)
+            {
+                is_tty_enabled = false;
+            }
+        }
 
 		if (!(USB_STATUS & USB_STATUS_MASK_USB_READY))
 			ret = USB_Process(0, 0, NULL, 0, NULL);
@@ -62,6 +87,10 @@ void	ReturnFromExceptionHook(void)
 
 	ReturnFromExceptionOld();
 }
+
+
+
+
 
 void	InstallUSBHook(void)
 {
