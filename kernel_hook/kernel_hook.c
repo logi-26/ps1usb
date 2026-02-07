@@ -47,13 +47,13 @@ static inline void	**GetB0Table(void)
 	return ((void **(*)(void))0xB0)();
 }
 
-void	ReturnFromExceptionHook(void)
+void 	ReturnFromExceptionHook(void)
 {
-	int	ret;
+	int ret;
 
-	if (kernel_hook_params.is_enabled)
-	{
-		if (g_tty_redirect_enabled)
+    if (kernel_hook_params.is_enabled)
+    {
+        if (g_tty_redirect_enabled)
         {
             if (!is_tty_enabled)
             {
@@ -65,15 +65,16 @@ void	ReturnFromExceptionHook(void)
         {
             if (is_tty_enabled)
             {
+                RestoreTTYToBIOS();          // Switch back to standard BIOS TTY-SIO
                 is_tty_enabled = false;
             }
         }
 
-		if (!(USB_STATUS & USB_STATUS_MASK_USB_READY))
-			ret = USB_Process(0, 0, NULL, 0, NULL);
-	}
+        if (!(USB_STATUS & USB_STATUS_MASK_USB_READY))
+            ret = USB_Process(0, 0, NULL, 0, NULL);
+    }
 
-	ReturnFromExceptionOld();
+    ReturnFromExceptionOld();
 }
 
 void	InstallUSBHook(void)

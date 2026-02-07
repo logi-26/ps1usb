@@ -89,3 +89,12 @@ void	SetupTTYhook(void)
 	syscall_open(USB_tty_dev.name, 2);		// Reopen stdin/stdout
 	syscall_open(USB_tty_dev.name, 1);
 }
+
+void 	RestoreTTYToBIOS(void)
+{
+    syscall_close(0);                       // Close current stdin/stdout (which point to our USB device)
+    syscall_close(1);
+    syscall_removeDevice(USB_tty_dev.name); // Remove our USB-based "tty" device
+    syscall_open("tty", 2);                 // Reopen stdin as BIOS TTY (SIO)
+    syscall_open("tty", 1);                 // Reopen stdout as BIOS TTY (SIO)
+}

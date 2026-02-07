@@ -22,7 +22,9 @@ Parameters:
 -a Specify the target address in the Playstation 1 memory in hexadecimal
 -s Specify the size of the data to transfer in decimal (only for the Download "-d" command)
 -c Command to Switch in TTY console mode & PC file server after the "Execute" command.
+-coff Command to Disable the TTY-USB re-direct and restore TTY-SIO output
 -p Specify the path of the files for the file server, require "-c" command.
+-z Set device id (only relevant if you have multiple PS1USB devices connected to the PC)
 
 Developer notes:
 Transfered data are secured using a CRC8 checksum each 2kbytes packet.
