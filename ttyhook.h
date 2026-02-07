@@ -38,9 +38,10 @@ int	USB_tty_action(struct File *file, enum FileAction action)
 			else
 				ret = true;					// Pretend success → no USB traffic, no delay
 		}
-		else
+		else {
 			ret = USB_GetByte(buf8);
-		
+		}
+
 		if (ret)
 		{
 			j++;

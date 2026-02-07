@@ -47,24 +47,12 @@ static inline void	**GetB0Table(void)
 	return ((void **(*)(void))0xB0)();
 }
 
-
-
-
 void	ReturnFromExceptionHook(void)
 {
 	int	ret;
 
 	if (kernel_hook_params.is_enabled)
 	{
-		
-		/*
-		if (!is_tty_enabled)
-		{
-			SetupTTYhook();
-			is_tty_enabled = true;
-		}
-		*/
-		
 		if (g_tty_redirect_enabled)
         {
             if (!is_tty_enabled)
@@ -87,10 +75,6 @@ void	ReturnFromExceptionHook(void)
 
 	ReturnFromExceptionOld();
 }
-
-
-
-
 
 void	InstallUSBHook(void)
 {

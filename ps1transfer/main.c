@@ -654,17 +654,13 @@ int main(int argc, char *argv[])
 			if (USB_Process('U', ptr, adrs, size))
 			{
 				printf("\nExecuting...\n");
-				
-				if (USB_Process('E', &data[8+4+4], 0, 15*4))
-				{
-					// Tell the kernel hook whether we want printf→USB or not
-					printf("TTY redirect %s\n", tty_enable ? "ENABLED" : "DISABLED");
-					USB_Process('T', NULL, tty_enable ? 1 : 0, 0);
 
-                     printf("\nExecuting...\n");
-                     if (!USB_Process('E', &data[8+4+4], 0, 15*4))
-                         goto USB_error;
-                }
+				if (!USB_Process('E', &data[8 + 4 + 4], 0, 15 * 4))
+					goto USB_error;
+
+				// Tell the kernel hook whether we want printf-USB or not
+				printf("TTY redirect %s\n", tty_enable ? "ENABLED" : "DISABLED");
+				USB_Process('T', NULL, tty_enable ? 1 : 0, 0);
 			}
 			else
 				goto USB_error;
